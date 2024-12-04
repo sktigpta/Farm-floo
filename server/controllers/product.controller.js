@@ -1,10 +1,10 @@
 import ProductModel from "../models/product.model.js";
 
-export const createProductController = async(request,response)=>{
+export const createProductController = async (request, response) => {
     try {
         const { 
-            name ,
-            image ,
+            name,
+            image, // String for image URL
             category,
             subCategory,
             unit,
@@ -13,19 +13,19 @@ export const createProductController = async(request,response)=>{
             discount,
             description,
             more_details,
-        } = request.body 
+        } = request.body;
 
-        if(!name || !image[0] || !category[0] || !subCategory[0] || !unit || !price || !description ){
+        if (!name || !image || !category[0] || !subCategory[0] || !unit || !price || !description) {
             return response.status(400).json({
-                message : "Enter required fields",
-                error : true,
-                success : false
-            })
+                message: "Enter required fields",
+                error: true,
+                success: false,
+            });
         }
 
         const product = new ProductModel({
-            name ,
-            image ,
+            name,
+            image,
             category,
             subCategory,
             unit,
@@ -34,24 +34,25 @@ export const createProductController = async(request,response)=>{
             discount,
             description,
             more_details,
-        })
-        const saveProduct = await product.save()
+        });
+
+        const saveProduct = await product.save();
 
         return response.json({
-            message : "Product Created Successfully",
-            data : saveProduct,
-            error : false,
-            success : true
-        })
-
+            message: "Product Created Successfully",
+            data: saveProduct,
+            error: false,
+            success: true,
+        });
     } catch (error) {
         return response.status(500).json({
-            message : error.message || error,
-            error : true,
-            success : false
-        })
+            message: error.message || error,
+            error: true,
+            success: false,
+        });
     }
-}
+};
+
 
 export const getProductController = async(request,response)=>{
     try {
@@ -202,37 +203,48 @@ export const getProductDetails = async(request,response)=>{
 }
 
 //update product
-export const updateProductDetails = async(request,response)=>{
+export const updateProductDetails = async (request, response) => {
     try {
-        const { _id } = request.body 
+        const { _id } = request.body;
 
-        if(!_id){
+        if (!_id) {
             return response.status(400).json({
-                message : "provide product _id",
-                error : true,
-                success : false
-            })
+                message: "Provide product _id",
+                error: true,
+                success: false,
+            });
         }
 
-        const updateProduct = await ProductModel.updateOne({ _id : _id },{
-            ...request.body
-        })
+        const updateProduct = await ProductModel.findByIdAndUpdate(
+            _id,
+            { ...request.body },
+            { new: true, runValidators: true } // Returns the updated document and runs validators
+        );
+
+        if (!updateProduct) {
+            return response.status(404).json({
+                message: "Product not found",
+                error: true,
+                success: false,
+            });
+        }
 
         return response.json({
-            message : "updated successfully",
-            data : updateProduct,
-            error : false,
-            success : true
-        })
-
+            message: "Updated successfully",
+            data: updateProduct,
+            error: false,
+            success: true,
+        });
     } catch (error) {
+        console.error(error); // Log the error for debugging
         return response.status(500).json({
-            message : error.message || error,
-            error : true,
-            success : false
-        })
+            message: error.message || error,
+            error: true,
+            success: false,
+        });
     }
-}
+};
+
 
 //delete product
 export const deleteProductDetails = async(request,response)=>{
